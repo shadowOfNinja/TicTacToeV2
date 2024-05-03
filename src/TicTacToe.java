@@ -4,12 +4,14 @@ import javax.swing.*;
 
 public class TicTacToe {
     int boardWidth = 600;
-    int boardHeight = 650; //50px for the text panel on top
+    int boardHeight = 700; //100px for the text panel on top and bottom
 
     JFrame frame = new JFrame("Tic-Tac-Toe");
     JLabel textLabel = new JLabel();
     JPanel textPanel = new JPanel();
     JPanel boardPanel = new JPanel();
+    JLabel scoreLabel = new JLabel();
+    JPanel scorePanel = new JPanel();
 
     JButton[][] board = new JButton[3][3];
     String playerX = "X";
@@ -18,8 +20,10 @@ public class TicTacToe {
 
     boolean gameOver = false;
     int turns = 0;
+    int playerXScore = 0;
+    int playerOScore = 0;
 
-    TicTacToe() {
+    public TicTacToe() {
         frame.setVisible(true);
         frame.setSize(boardWidth, boardHeight);
         frame.setLocationRelativeTo(null);
@@ -40,19 +44,33 @@ public class TicTacToe {
 
         boardPanel.setLayout(new GridLayout(3, 3));
         boardPanel.setBackground(Color.darkGray);
-        frame.add(boardPanel);
+        frame.add(boardPanel, BorderLayout.CENTER);
 
-        for (int r = 0; r < 3; r++) {
-            for (int c = 0; c < 3; c++) {
+        scoreLabel.setBackground(Color.darkGray);
+        scoreLabel.setForeground(Color.white);
+        scoreLabel.setFont(new Font("Arial", Font.BOLD, 50));
+        scoreLabel.setHorizontalAlignment(JLabel.CENTER);
+        scoreLabel.setText("X: " + playerXScore + " - O: " + playerOScore);
+        scoreLabel.setOpaque(true);
+
+        scorePanel.setLayout(new BorderLayout());
+        scorePanel.add(scoreLabel);
+        frame.add(scorePanel, BorderLayout.SOUTH);
+
+        drawBoard();
+    }
+
+    private void drawBoard() {
+        for (int row = 0; row < 3; row++) {
+            for (int column = 0; column < 3; column++) {
                 JButton tile = new JButton();
-                board[r][c] = tile;
+                board[row][column] = tile;
                 boardPanel.add(tile);
 
                 tile.setBackground(Color.darkGray);
                 tile.setForeground(Color.white);
                 tile.setFont(new Font("Arial", Font.BOLD, 120));
                 tile.setFocusable(false);
-                // tile.setText(currentPlayer);
 
                 tile.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
@@ -66,15 +84,42 @@ public class TicTacToe {
                                 currentPlayer = currentPlayer == playerX ? playerO : playerX;
                                 textLabel.setText(currentPlayer + "'s turn.");
                             }
+                            else {
+                                if (currentPlayer == playerX) {
+                                    playerXScore ++;
+                                }
+                                else {
+                                    playerOScore++;
+                                }
+                                scoreLabel.setText("X: " + playerXScore + " - O: " + playerOScore);
+                                // Display Replay dialog option
+                                int selection = JOptionPane.showConfirmDialog (null, "Play another game?","Play again?",JOptionPane.YES_NO_OPTION);
+                                if (selection == JOptionPane.YES_OPTION) {
+                                    // Reset board with the next player
+                                    resetGame();
+                                    drawBoard();
+                                }
+                                else {
+                                    // terminate application
+                                    System.exit(0);
+                                }
+                            }
                         }
-
                     }
                 });
             }
         }
     }
+
+    private void resetGame() {
+        boardPanel.removeAll();
+        gameOver = false;
+        turns = 0;
+        currentPlayer = currentPlayer == playerX ? playerO : playerX;
+        textLabel.setText(currentPlayer + "'s turn.");
+    }
     
-    void checkWinner() {
+    private void checkWinner() {
         //horizontal
         for (int r = 0; r < 3; r++) {
             if (board[r][0].getText() == "") continue;
@@ -135,13 +180,13 @@ public class TicTacToe {
         }
     }
 
-    void setWinner(JButton tile) {
+    private void setWinner(JButton tile) {
         tile.setForeground(Color.green);
         tile.setBackground(Color.gray);
         textLabel.setText(currentPlayer + " is the winner!");
     }
 
-    void setTie(JButton tile) {
+    private void setTie(JButton tile) {
         tile.setForeground(Color.orange);
         tile.setBackground(Color.gray);
         textLabel.setText("Tie!");
